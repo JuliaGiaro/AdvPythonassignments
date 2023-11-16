@@ -17,7 +17,14 @@ class TestTramData(unittest.TestCase):
             self.assertIn(stop, self.stopdict, msg = stop + ' not in stopdict')
 
     # add your own tests here
-
+    def test_lines_exist(self):
+        lineset = []
+        with open("tramlines.txt", encoding="utf-8") as f:
+            text = f.read()
+            p = text.split("\n\n")
+            for line in p:
+                lineset.append(line.split("\n", 1)[0][:-1])
+            
     #the task is to write 
     # THREE functions that build dictionaries,
     # FOUR functions that extract information from them,

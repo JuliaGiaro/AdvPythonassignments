@@ -10,29 +10,53 @@ LINE_FILE = './data/tramlines.txt'
 TRAM_FILE = './tramnetwork.json'
 
 def build_tram_stops(jsonobject):
-    ## YOUR CODE HERE
+    
+    dict = json.load(jsonobject)
+    dict_tram_stops = {}
+    
+    for stop in dict:
+        dict_tram_stops[stop] = {}
+        dict_tram_stops[stop].update({'lat:': dict[stop]['position'][0]})
+        dict_tram_stops[stop].update({'lon': dict[stop]['position'][1]})
+    return dict_tram_stops
+
     # build a STOP dictionary where: 
+
     # 1: KEYS are NAMES of tram stops 
     # 2: VALUES are dictionaries with: 
     #    -the latitude 
     #    -the longitude
     
     ## EXAMPLE OF OUTPUT:
+    
     #    {
     #  'Majvallen': {
     #    'lat': 57.6909343,
 	#'lon': 11.9354935
     #    }
     # }
-    pass
+    
+    # pass
 
-def build_tram_lines(lines):
-    ## YOUR CODE HERE
+def build_tram_lines(fullList):
+    ## YOUR CODE HERE 
+    
+    tramlineDict = {}
+    i = 0
+    while i < len(fullList):
+        line_name = fullList[i][:-1]
+        stops = [" ".join(stop[:-1]) for stop in map(str.split, fullList[i+1])]
+        tramlineDict[line_name] = stops
+        i += 2
+    return tramlineDict
+
+    
+    
     # build a line dictionary where: 
     # 1: KEYS are NAMES (usually digits, but treated as strings) 
     # 2: VALUES are lists of stop names, in order in which the tram runs: 
     #    
-    
+      
     ## EXAMPLE OF OUTPUT:
     #      {
     # "9": [
@@ -42,14 +66,34 @@ def build_tram_lines(lines):
 	#    # many more stops in between
     #    "Sandarna",
     #    "Kungssten"
-    #  ]
+    #  
     # }
-    pass
+ #pass
+ 
+def build_tram_time_dict(linefile, dict_tram_stops):
+    time_dict ={}
+    for line in linefile:
+        stops = line.split(":")[1:]
+        for i in range(len(stops) - 1):
+            stop_a, stop_b = stops[i].strip(), stops[i + 1].strip()
+            
+            if stop_a not in time_dict:
+                time_dict[stop_a] = {}
+            
+            # Calculate transition time as the difference in stop order
+            time_dict[stop_a][stop_b] = list(dict_tram_stops[stop_a].keys()).index(stop_b) + 1
+    
+    return time_dict
+      
 
 #def time_dictionary(keys as stop names, values as dictionaries from stop names to nr of minutes):
 
 
 def build_tram_network(stopfile, linefile):
+    
+    
+    
+    
     ## YOUR CODE HERE
     #this one puts everything together, reads the two input files and
     #writes a third one "tramnetwork.json"
@@ -156,7 +200,8 @@ def dialogue(tramfile=TRAM_FILE):
     pass
 
 if __name__ == '__main__':
-    if sys.argv[1:] == ['init']:
-        build_tram_network(STOP_FILE,LINE_FILE)
-    else:
-        dialogue()
+   ## if sys.argv[1:] == ['init']:
+      ##  build_tram_network(STOP_FILE,LINE_FILE)
+        print( build_tram_lines(lines= 9))
+   ## else:
+   ##     dialogue()
