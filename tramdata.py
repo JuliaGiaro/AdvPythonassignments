@@ -1,6 +1,6 @@
 import sys
 import json
-
+from math import radians, sin, cos, sqrt, atan2
 
 # files given
 STOP_FILE = './data/tramstops.json'
@@ -70,23 +70,34 @@ def build_tram_lines(fullList):
     # }
  #pass
  
-def build_tram_time_dict(linefile, dict_tram_stops):
-    time_dict ={}
-    for line in linefile:
-        stops = line.split(":")[1:]
-        for i in range(len(stops) - 1):
-            stop_a, stop_b = stops[i].strip(), stops[i + 1].strip()
-            
-            if stop_a not in time_dict:
-                time_dict[stop_a] = {}
-            
-            # Calculate transition time as the difference in stop order
-            time_dict[stop_a][stop_b] = list(dict_tram_stops[stop_a].keys()).index(stop_b) + 1
-    
-    return time_dict
-      
+def build_stop_times(fullList):
+    stopTimeDict = {}
+
+    for i in range(1, len(fullList), 2):  # Start from index 1 and step by 2
+        for j in range(len(fullList[i]) - 1):
+            stop1 = " ".join(fullList[i][j].split()[:-1])
+            stop2 = " ".join(fullList[i][j + 1].split()[:-1])
+            timeBetween = int(fullList[i][j + 1].split()[-1][-2:]) - int(fullList[i][j].split()[-1][-2:])
+
+            if stop1 in stopTimeDict:
+                stopTimeDict[stop1].update({stop2: timeBetween})
+            else:
+                stopTimeDict[stop1] = {stop2: timeBetween}
+
+    return stopTimeDict
 
 #def time_dictionary(keys as stop names, values as dictionaries from stop names to nr of minutes):
+
+def format_textfile(file):
+    fullList = []
+    with open(file, encoding='utf-8') as f:
+        text = f.read()
+        paragraphs = text.split("\n\n")
+        for paragraph in paragraphs:
+            lines = paragraph.split("\n", 1)
+            fullList.append(lines[0])
+            fullList.extend(lines[1].split("\n"))
+    return fullList
 
 
 def build_tram_network(stopfile, linefile):
@@ -125,32 +136,78 @@ def build_tram_network(stopfile, linefile):
     pass
 
 def lines_via_stop(linedict, stop):
+    
+    lines = [line for line, stops in linedict.items() if stop in stops]
+    return sorted(lines, key=lambda x: int(x))
     ## YOUR CODE HERE
     
     # this lists all the lines that go via the given stop
     # the lines should be sorted in their numeric order dvs 2 before 10
     
-    pass
+   # pass
 
 def lines_between_stops(linedict, stop1, stop2):
+    
+    lines = [line for line, stops in linedict.items() if stop1 in stops and stop2 in stops]
+    return sorted(lines, key=lambda x: int(x))
+    
     ## YOUR CODE HERE
     # this lists all the lines that go from stop1 to stop2
     # the lines should be sorted in their numeric order
     # OBS! each line is assumed to serve in both directions, the direction listed explicitly and the opposite
     
     
-    pass
+   # pass
 
 def time_between_stops(linedict, timedict, line, stop1, stop2):
+    if line not in linedict:
+        return "Error: Line not found."
+
+    stops = linedict[line]
+    if stop1 not in stops or stop2 not in stops:
+        return "Error: Stops not found on the given line."
+
+    times = timedict[line]
+    total_time = 0
+    for i in range(len(stops) - 1):
+        if (stops[i] == stop1 and stops[i + 1] == stop2) or (stops[i] == stop2 and stops[i + 1] == stop1):
+            total_time += abs(times[i + 1] - times[i])
+    
+    return total_time
+    
     ## YOUR CODE HERE
     
     #calculates the time from stop1 to stop2 along the given line 
     # this is obtained by the sum of all distances between adjacent stops
     # if the stops are not along the same line, an error message is printed
         
-    pass
+    #pass
 
 def distance_between_stops(stopdict, stop1, stop2):
+    if stop1 not in stopdict or stop2 not in stopdict:
+        return "Error: Stop not found."
+
+    lat1, lon1 = stopdict[stop1]
+    lat2, lon2 = stopdict[stop2]
+
+    # Radius of the Earth in kilometers
+    R = 6371.0
+
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1 = radians(lat1), radians(lon1)
+    lat2, lon2 = radians(lat2), radians(lon2)
+
+    # Calculate the change in coordinates
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Haversine formula to calculate distance
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+    
     ## YOUR CODE HERE
     
     # calculates the geographic distance between any two stops, based on their lang and long
@@ -160,7 +217,7 @@ def distance_between_stops(stopdict, stop1, stop2):
     # OBS eftersom det finns en ny version 3.11 av python som kan definea detta bättre
     # länk: [Haversine](https://pypi.org/project/haversine/).
     # kan man få extra poäng om man inte gör det med en library som i ursprungsversionen
-    pass
+    #pass
 
 def answer_query(tramdict, query):
     ## YOUR CODE HERE
