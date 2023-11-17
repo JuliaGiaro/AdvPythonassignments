@@ -5,7 +5,7 @@
 import os.path
 import sys
 import json
-from haversine import haversine
+
 
 
 try:

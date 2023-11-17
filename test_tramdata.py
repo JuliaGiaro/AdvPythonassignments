@@ -10,6 +10,7 @@ class TestTramData(unittest.TestCase):
             tramdict = json.loads(trams.read())
             self.stopdict = tramdict['stops']
             self.linedict = tramdict['lines']
+            self.fulldict = tramdict
 
     def test_stops_exist(self):
         stopset = {stop for line in self.linedict for stop in self.linedict[line]}
