@@ -1,14 +1,15 @@
 import math
+import os
 import sys
 import json
-
+print("Current Working Directory:", os.getcwd())
 
 # files given
-STOP_FILE = './data/tramstops.json'
-LINE_FILE = './data/tramlines.txt'
+STOP_FILE = '..\\data\\tramstops.json'
+LINE_FILE = '..\\data\\tramlines.txt'
 
 # file to give
-TRAM_FILE = './data/tramnetwork.json'
+TRAM_FILE = os.path.abspath('..\\data\\tramnetwork.json')
 
 def build_tram_stops(jsonobject):
     
@@ -101,21 +102,23 @@ def format_textfile(file):
     return fullList
 
 
-def build_tram_network(stopfile, linefile):
-    
-     with open(linefile) as f:
-        dict_tram_stops = build_tram_stops(f)
-        print("dict_tram_stops", dict_tram_stops)
-        formatted_list = format_textfile(stopfile)
-        print("formatted_list:", formatted_list)
-        tramLineDict = build_tram_lines(formatted_list)
-        print("tramLineDict:", tramLineDict)
-        stopTimeDict = build_stop_times(formatted_list)
-        print("stopTimeDict:", stopTimeDict)
-        linedict = {"stops":dict_tram_stops, "lines" : tramLineDict, "times":stopTimeDict}
+def build_tram_network( STOP_FILE, LINE_FILE, TRAM_FILE= '../data/tramnetwork.json'):
+    data_dir = os.path.dirname(TRAM_FILE)
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+        with open(LINE_FILE) as line_f, open(STOP_FILE) as stop_f:
+            dict_tram_stops = build_tram_stops(line_f)
+            formatted_list = format_textfile(stop_f)
+      
+            tramLineDict = build_tram_lines(formatted_list)
         
-        with open('tramnetwork.json', 'w', encoding="utf-8") as f:
-            json.dump(linedict, f, indent=4, ensure_ascii=False)
+            stopTimeDict = build_stop_times(formatted_list)
+        
+            data = {"stops":dict_tram_stops, "lines" : tramLineDict, "times":stopTimeDict}
+        
+            with open(TRAM_FILE, 'w', encoding="utf-8") as tram_f:
+                print("Creating file:", TRAM_FILE)
+                json.dump(data, tram_f, indent=4, ensure_ascii=False)
 
        
     
@@ -149,15 +152,15 @@ def build_tram_network(stopfile, linefile):
   #  }
 
     #pass
-def lines_via_stop(linedict, stop):
-     resultlist = []
-     for line in linedict["lines"]:
-        if stop in linedict["lines"][line]:
-            resultlist.append(line)
-        if len(resultlist) > 0:
-            return resultlist
-        else:
-         return "Unkown arguments"
+#def lines_via_stop(linedict, stop):
+#     resultlist = []
+#    for line in linedict["lines"]:
+#        if stop in linedict["lines"][line]:
+#            resultlist.append(line)
+#        if len(resultlist) > 0:
+#            return resultlist
+#        else:
+#         return "Unkown arguments"
     ## YOUR CODE HERE
     
     # this lists all the lines that go via the given stop
@@ -165,15 +168,15 @@ def lines_via_stop(linedict, stop):
     
    # pass
 
-def lines_between_stops(linedict, stop1, stop2):
-        resultlist = []
-        for line in linedict["lines"]:
-            if stop1 in linedict["lines"][line] and stop2 in linedict["lines"][line]:
-             resultlist.append(line)
-        if len(resultlist) > 0:
-          return resultlist
-        else:
-          return "Unkown arguments"
+#def lines_between_stops(linedict, stop1, stop2):
+#        resultlist = []
+#        for line in linedict["lines"]:
+#            if stop1 in linedict["lines"][line] and stop2 in linedict["lines"][line]:
+#            resultlist.append(line)
+#        if len(resultlist) > 0:
+#          return resultlist
+#        else:
+#          return "Unkown arguments"
     ## YOUR CODE HERE
     # this lists all the lines that go from stop1 to stop2
     # the lines should be sorted in their numeric order
@@ -182,28 +185,28 @@ def lines_between_stops(linedict, stop1, stop2):
     
    # pass
    
-def distance_between_stops(stopdict, stop1, stop2):
-    if stop1 not in stopdict or stop2 not in stopdict:
-        return "Error: Stop not found."
+#def distance_between_stops(stopdict, stop1, stop2):
+#    if stop1 not in stopdict or stop2 not in stopdict:
+#        return "Error: Stop not found."
 
-    lat1, lon1 = stopdict[stop1]
-    lat2, lon2 = stopdict[stop2]
+#    lat1, lon1 = stopdict[stop1]
+#    lat2, lon2 = stopdict[stop2]
 
     # Radius of the Earth in kilometers
-    R = 6371.0
+#    R = 6371.0
 
     # Convert latitude and longitude from degrees to radians
-    lat1, lon1 = math.radians(lat1), math.radians(lon1)
-    lat2, lon2 = math.radians(lat2), math.radians(lon2)
+#    lat1, lon1 = math.radians(lat1), math.radians(lon1)
+#    lat2, lon2 = math.radians(lat2), math.radians(lon2)
 
     # Calculate the change in coordinates
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
+#    dlat = lat2 - lat1
+#    dlon = lon2 - lon1
 
     # Haversine formula to calculate distance
-    mean_lat = (lat1 + lat2) / 2
-    distance = R * math.sqrt(dlat**2 + (math.cos(mean_lat) * dlon)**2)
-    return round(distance,3)
+#    mean_lat = (lat1 + lat2) / 2
+#    distance = R * math.sqrt(dlat**2 + (math.cos(mean_lat) * dlon)**2)
+#    return round(distance,3)
     
     ## YOUR CODE HERE
     
@@ -216,30 +219,30 @@ def distance_between_stops(stopdict, stop1, stop2):
     # kan man få extra poäng om man inte gör det med en library som i ursprungsversionen
     #pass
     
-def time_between_stops(linedict, timedict, line, stop1, stop2):
-    if line not in linedict["lines"]:
-        return "Error: Line not found."
+#def time_between_stops(linedict, timedict, line, stop1, stop2):
+#    if line not in linedict["lines"]:
+#        return "Error: Line not found."
 
-    stopSet = linedict["lines"][line]
-    if stop1 not in stopSet.index(stop1) or stop2 not in stopSet.index(stop2):
-        return "Error: Stops not found on the given line."
+#    stopSet = linedict["lines"][line]
+#    if stop1 not in stopSet.index(stop1) or stop2 not in stopSet.index(stop2):
+#        return "Error: Stops not found on the given line."
 
-    index1 = stopSet.index(stop1)
-    index2 = stopSet.index(stop2)
+#    index1 = stopSet.index(stop1)
+#    index2 = stopSet.index(stop2)
 
-    journey_set = stopSet[min(index1, index2): max(index1, index2) + 1]
-    total_time = 0
+#    journey_set = stopSet[min(index1, index2): max(index1, index2) + 1]
+#    total_time = 0
 
-    for i in range(len(journey_set) - 1):
-        current_stop = journey_set[i]
-        next_stop = journey_set[i + 1]
+#    for i in range(len(journey_set) - 1):
+#        current_stop = journey_set[i]
+#        next_stop = journey_set[i + 1]
 
-        if current_stop in timedict and next_stop in timedict[current_stop]:
-            total_time += timedict[current_stop][next_stop]
-        else:
-            return "Error: Time information not available for stops {} and {}".format(current_stop, next_stop)
+#        if current_stop in timedict and next_stop in timedict[current_stop]:
+#            total_time += timedict[current_stop][next_stop]
+#        else:
+#            return "Error: Time information not available for stops {} and {}".format(current_stop, next_stop)
 
-    return total_time
+#    return total_time
     ## YOUR CODE HERE
     
     #calculates the time from stop1 to stop2 along the given line 
@@ -248,19 +251,20 @@ def time_between_stops(linedict, timedict, line, stop1, stop2):
         
     #pass
 
-def dialogue(tramfile=TRAM_FILE):
-    with open(TRAM_FILE, encoding="utf-8") as file:
-        tram_data = json.load(file)
+#def dialogue(TRAM_FILE):
+    
+#    with open(TRAM_FILE, encoding="utf-8") as file:
+#        tram_data = json.load(file)
 
-    while True:
-        user_input = input("> ").lower()
+#    while True:
+#        user_input = input("> ").lower()
 
-        if user_input.startswith("quit"):
-            print("Program terminated.")
-            break
+#       if user_input.startswith("quit"):
+#            print("Program terminated.")
+#            break
 
-        result = answer_query(tram_data, user_input)
-        print(result)
+#        result = answer_query(tram_data, user_input)
+#        print(result)
     
 
     ## YOUR CODE HERE
@@ -292,33 +296,33 @@ def dialogue(tramfile=TRAM_FILE):
     
   #  pass
 
-def answer_query(tramdict, query):
-    if "via" in userInput:
-        stop = " ".join(userInput.split()[1:])
-        return lines_via_stop(dict, stop)
-    elif "between" in userInput and "and" in userInput:
-        userInput = userInput.split()
-        andIndex = userInput.index("and")
-        stop1 = " ".join(userInput[1:andIndex])
-        stop2 = " ".join(userInput[andIndex+1:])
-        return lines_between_stops(dict, stop1, stop2)
-    elif "time with" in userInput:
-        userInput = userInput.split()
-        fromIndex = userInput.index("from")
-        toIndex = userInput.index("to")
-        line = userInput[2:fromIndex][0]
-        stop1 = " ".join(userInput[fromIndex+1:toIndex])
-        stop2 = " ".join(userInput[toIndex+1:])
-        return time_between_stops(dict, line, stop1, stop2)
-    elif "distance from" in userInput:
-        userInput = userInput.split()
-        fromIndex = userInput.index("from")
-        toIndex = userInput.index("to")
-        stop1 = " ".join(userInput[fromIndex+1:toIndex])
-        stop2 = " ".join(userInput[toIndex+1:])
-        return distance_between_stops(dict["stop"], stop1, stop2)
-    else:
-        return "Sorry, try again"
+#def answer_query(tramdict, query):
+#    if "via" in userInput:
+#       stop = " ".join(userInput.split()[1:])
+#        return lines_via_stop(dict, stop)
+#    elif "between" in userInput and "and" in userInput:
+#        userInput = userInput.split()
+#        andIndex = userInput.index("and")
+#        stop1 = " ".join(userInput[1:andIndex])
+#        stop2 = " ".join(userInput[andIndex+1:])
+#        return lines_between_stops(dict, stop1, stop2)
+#    elif "time with" in userInput:
+#        userInput = userInput.split()
+#        fromIndex = userInput.index("from")
+#        toIndex = userInput.index("to")
+#        line = userInput[2:fromIndex][0]
+#        stop1 = " ".join(userInput[fromIndex+1:toIndex])
+#        stop2 = " ".join(userInput[toIndex+1:])
+#        return time_between_stops(dict, line, stop1, stop2)
+#    elif "distance from" in userInput:
+#        userInput = userInput.split()
+#        fromIndex = userInput.index("from")
+#        toIndex = userInput.index("to")
+#        stop1 = " ".join(userInput[fromIndex+1:toIndex])
+#        stop2 = " ".join(userInput[toIndex+1:])
+#        return distance_between_stops(dict["stop"], stop1, stop2)
+#    else:
+#        return "Sorry, try again"
 
     ## YOUR CODE HERE
     
@@ -332,5 +336,5 @@ if __name__ == '__main__':
     if sys.argv[1:] == ['init']:
        build_tram_network("tramlines.txt","tramstops.json")
        
-    else:
-      dialogue("tramnetwork.json")
+#    else:
+#      dialogue("tramnetwork.json")
